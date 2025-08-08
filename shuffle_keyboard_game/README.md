@@ -26,24 +26,24 @@ For Software:
 ### Implementation
 For Software: 
 # Installation
-# Install Flutter SDK:  
+## Install Flutter SDK:  
 https://docs.flutter.dev/get-started/install  
 
-# Clone the repo (if applicable):  
+## Clone the repo (if applicable):  
 git clone https://github.com/yourusername/keyboard-shuffler.git  
 
-# Navigate to project directory  
+## Navigate to project directory  
 cd keyboard-shuffler  
 
-# Get dependencies  
+## Get dependencies  
 flutter pub get  
 
-# Run
-[commands]
-# Run on connected device or emulator  
+## Run
+
+### Run on connected device or emulator  
 flutter run  
 
-# For web  
+## For web  
 flutter run -d chrome  
 Project Documentation
 For Software:
