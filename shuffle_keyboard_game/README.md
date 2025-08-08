@@ -61,7 +61,7 @@ https://github.com/user-attachments/assets/7b1cf52d-fb00-43d5-9a44-97b4d365cc33
 ## Team Contributions
 - ANJOSE BENOY : APP DEVELOPMENT AND SOFTWARE PART
 - GAZWAN SARITH SLIM: LAYOUT DESIGN AND IMPLEMENTATION
-- [Name 3]: [Specific contributions]
+
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
