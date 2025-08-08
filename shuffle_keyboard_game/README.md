@@ -1,31 +1,24 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# SHUFFLE
 
-
-## Basic Details
-### Team Name: [Name]
+## KEYBOARD  GAME :
+### Team Name: GALWAY
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
-- Member 3: [Name] - [College]
+
+- Member1: ANJOSE - MACE
+- Member2: GAZWAN - MACE
 
 ### Project Description
-[2-3 lines about what your project does]
-
-### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
-
-### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+THE PROJECT SHOWS HOW COULD YOU COMPETE WITH THE REARRANGING KEYBOARD
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
+- VS CODE , 
 - [Frameworks used]
 - [Libraries used]
 - [Tools used]
