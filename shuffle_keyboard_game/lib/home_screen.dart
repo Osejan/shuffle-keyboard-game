@@ -1,16 +1,3 @@
-Great job trying to implement the features!  
-Your code is **almost correct**, but there are a few issues:
-
-1. **CustomPainter**: You cannot use a `Paint` object as a color in a `TextStyle`.  
-2. **Font**: If the Algerian font is not available, it will throw an error. You should use a fallback font or ensure the font is added to your assets and `pubspec.yaml`.
-3. **Text Color**: Use `color:` directly in `TextStyle`, not a `Paint` object.
-4. **Text Overlap**: The floating letters may overlap the buttons/text. You may want to add a background color or blur for the foreground content for better readability (optional).
-
----
-
-## **Here is the corrected code:**
-
-```dart
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'game_screen.dart';
@@ -201,30 +188,3 @@ class _LiveButtonState extends State<LiveButton> with SingleTickerProviderStateM
     );
   }
 }
-```
-
----
-
-## **How to fix the font error:**
-
-1. **Download the Algerian font** (or any font you want).
-2. Place it in your project under `assets/fonts/Algerian.ttf`.
-3. Add this to your `pubspec.yaml`:
-
-```yaml
-flutter:
-  fonts:
-    - family: Algerian
-      fonts:
-        - asset: assets/fonts/Algerian.ttf
-```
-
-4. Run `flutter pub get`.
-
----
-
-**If you don't have the font, use a default font (like `fontFamily: 'Roboto'`) or remove the `fontFamily` line.**
-
----
-
-Let me know if you need help with the font or want to add more effects!
