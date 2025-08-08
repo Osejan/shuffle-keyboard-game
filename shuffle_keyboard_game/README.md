@@ -19,24 +19,33 @@ THE PROJECT SHOWS HOW COULD YOU COMPETE WITH THE REARRANGING KEYBOARD
 ### Technologies/Components Used
 For Software:
 - VS CODE , 
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
-
-For Hardware:
-- [List main components]
-- [List specifications]
-- [List tools required]
+- Flutter,dart Language
+- Flutter Material ,Dart Async
+- Flutter SDK , VScode,Hot Reload / Hot Restart,Android Emulator
 
 ### Implementation
-For Software:
+For Software: 
 # Installation
-[commands]
+# Install Flutter SDK:  
+https://docs.flutter.dev/get-started/install  
+
+# Clone the repo (if applicable):  
+git clone https://github.com/yourusername/keyboard-shuffler.git  
+
+# Navigate to project directory  
+cd keyboard-shuffler  
+
+# Get dependencies  
+flutter pub get  
 
 # Run
 [commands]
+# Run on connected device or emulator  
+flutter run  
 
-### Project Documentation
+# For web  
+flutter run -d chrome  
+Project Documentation
 For Software:
 
 # Screenshots (Add at least 3)
