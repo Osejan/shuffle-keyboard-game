@@ -5,7 +5,12 @@ import 'paragraphs.dart';
 
 class GameScreen extends StatefulWidget {
   final int shuffleInterval; // in seconds, 0 means no shuffle
-  GameScreen({required this.shuffleInterval});
+  final String? paragraph;   // optional: allow HomeScreen to provide a first-round paragraph
+  const GameScreen({
+    Key? key,
+    required this.shuffleInterval,
+    this.paragraph,
+  }) : super(key: key);
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -19,7 +24,7 @@ class _GameScreenState extends State<GameScreen> {
   List<String> keys = [];
   bool gameOver = false;
 
-  // For background color cycling
+  // Background colors
   final List<Color> backgroundColors = [
     Colors.blue.shade100,
     Colors.green.shade100,
@@ -42,7 +47,7 @@ class _GameScreenState extends State<GameScreen> {
   ];
   Color currentBackground = Colors.blue.shade100;
 
-  // For paragraph cycling
+  // Paragraph cycling
   final List<String> _paragraphHistory = [];
   final int _historyLimit = 15;
   final Random _random = Random();
@@ -62,16 +67,31 @@ class _GameScreenState extends State<GameScreen> {
       } while (newColor == currentBackground);
       currentBackground = newColor;
 
-      // Pick a new paragraph not in recent history
+      // Paragraph selection:
+      // Use the provided paragraph only on the first round (when history is empty).
       String newParagraph;
-      List<String> available = funnyParagraphs
-          .where((p) => !_paragraphHistory.contains(p))
-          .toList();
-      if (available.isEmpty) {
-        _paragraphHistory.clear();
-        available = List.from(funnyParagraphs);
+      if (widget.paragraph != null && _paragraphHistory.isEmpty) {
+        newParagraph = widget.paragraph!;
+      } else {
+        List<String> available = funnyParagraphs
+            .where((p) => !_paragraphHistory.contains(p))
+            .toList();
+
+        // If we've exhausted the no-repeat pool, clear history and start over.
+        if (available.isEmpty) {
+          _paragraphHistory.clear();
+          available = List.from(funnyParagraphs);
+        }
+
+        // Optionally avoid picking the same as the immediate last paragraph if possible
+        if (available.length > 1 && _paragraphHistory.isNotEmpty) {
+          available.remove(_paragraphHistory.last);
+        }
+
+        available.shuffle(_random);
+        newParagraph = available.first;
       }
-      newParagraph = (available..shuffle(_random)).first;
+
       targetText = newParagraph;
       _paragraphHistory.add(newParagraph);
       if (_paragraphHistory.length > _historyLimit) {
@@ -80,12 +100,12 @@ class _GameScreenState extends State<GameScreen> {
 
       // Reset game state
       typedText = "";
-      timeLeft = 30;
+      timeLeft = 30; // each round lasts 30s
       gameOver = false;
       keys = _generateKeys();
     });
 
-    // Cancel any previous timer
+    // Cancel any previous timer and start a new one
     gameTimer?.cancel();
     _startGame();
   }
@@ -98,10 +118,11 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   void _startGame() {
-    gameTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    gameTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
       setState(() {
         timeLeft--;
-        if (widget.shuffleInterval > 0 && timeLeft % widget.shuffleInterval == 0) {
+        if (widget.shuffleInterval > 0 && timeLeft > 0 && timeLeft % widget.shuffleInterval == 0) {
           keys.shuffle(_random);
         }
         if (timeLeft <= 0) {
@@ -116,7 +137,7 @@ class _GameScreenState extends State<GameScreen> {
     setState(() => gameOver = true);
 
     // Restart the game after a short delay, only if still mounted
-    Future.delayed(Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
         _startNewGame();
       }
@@ -128,14 +149,39 @@ class _GameScreenState extends State<GameScreen> {
     for (int i = 0; i < typedText.length && i < targetText.length; i++) {
       if (typedText[i] == targetText[i]) correct++;
     }
+    if (targetText.isEmpty) return 0;
     return (correct / targetText.length) * 100;
   }
 
   Widget _buildKeyboard() {
+    // Defensive: ensure we have enough keys for the splits
+    final List<String> k = List.of(keys);
+    if (k.length < 20) {
+      // Fallback to avoid range errors if keys list changes
+      return Wrap(
+        spacing: 4,
+        runSpacing: 4,
+        alignment: WrapAlignment.center,
+        children: k
+            .map((key) => ElevatedButton(
+                  onPressed: gameOver ? null : () {
+                    setState(() {
+                      typedText += key;
+                      if (typedText.length >= targetText.length) {
+                        _endGame();
+                      }
+                    });
+                  },
+                  child: Text(key.toUpperCase()),
+                ))
+            .toList(),
+      );
+    }
+
     List<List<String>> rows = [
-      keys.sublist(0, 10),
-      keys.sublist(10, 19),
-      keys.sublist(19),
+      k.sublist(0, 10),
+      k.sublist(10, 19),
+      k.sublist(19),
     ];
 
     return Column(
@@ -146,17 +192,19 @@ class _GameScreenState extends State<GameScreen> {
             return Padding(
               padding: const EdgeInsets.all(2.0),
               child: ElevatedButton(
-                style: ElevatedButton.styleFrom(minimumSize: Size(40, 50)),
-                onPressed: gameOver ? null : () {
-                  setState(() {
-                    typedText += key;
-                    // If finished typing, end game early
-                    if (typedText.length >= targetText.length) {
-                      _endGame();
-                    }
-                  });
-                },
-                child: Text(key.toUpperCase(), style: TextStyle(fontSize: 18)),
+                style: ElevatedButton.styleFrom(minimumSize: const Size(40, 50)),
+                onPressed: gameOver
+                    ? null
+                    : () {
+                        setState(() {
+                          typedText += key;
+                          // If finished typing, end game early
+                          if (typedText.length >= targetText.length) {
+                            _endGame();
+                          }
+                        });
+                      },
+                child: Text(key.toUpperCase(), style: const TextStyle(fontSize: 18)),
               ),
             );
           }).toList(),
@@ -174,34 +222,36 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Typing Challenge")),
+      appBar: AppBar(title: const Text("Typing Challenge")),
       body: AnimatedContainer(
-        duration: Duration(milliseconds: 600),
+        duration: const Duration(milliseconds: 600),
         color: currentBackground,
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            Text("Type this:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text("Type this:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text(targetText, style: TextStyle(color: Colors.grey[700])),
-            SizedBox(height: 10),
-            Text("Time Left: $timeLeft s", style: TextStyle(fontSize: 20, color: Colors.red)),
+            const SizedBox(height: 10),
+            Text("Time Left: $timeLeft s", style: const TextStyle(fontSize: 20, color: Colors.red)),
             Container(
-              margin: EdgeInsets.symmetric(vertical: 10),
-              padding: EdgeInsets.all(8),
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.all(8),
               color: Colors.grey[200],
               width: double.infinity,
-              child: Text(typedText, style: TextStyle(fontSize: 18)),
+              child: Text(typedText, style: const TextStyle(fontSize: 18)),
             ),
-            Expanded(child: Align(
-              alignment: Alignment.bottomCenter,
-              child: _buildKeyboard(),
-            )),
+            Expanded(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: _buildKeyboard(),
+              ),
+            ),
             if (gameOver) ...[
-              SizedBox(height: 10),
-              Text("Game Over!", style: TextStyle(fontSize: 22, color: Colors.red)),
+              const SizedBox(height: 10),
+              const Text("Game Over!", style: TextStyle(fontSize: 22, color: Colors.red)),
               Text("Accuracy: ${_accuracy().toStringAsFixed(2)}%"),
               Text("Characters Typed: ${typedText.length}"),
-              Text("Restarting...", style: TextStyle(fontSize: 16, color: Colors.grey)),
+              const Text("Restarting...", style: TextStyle(fontSize: 16, color: Colors.grey)),
             ]
           ],
         ),
