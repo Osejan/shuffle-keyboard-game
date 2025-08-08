@@ -49,41 +49,14 @@ Project Documentation
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+<img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/b4e2a0d3-4d3a-4b0d-90b9-7a0a83f32b59"/>
+<img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/a8f24fdd-30aa-475c-96fe-3b992e4b2a9e"/>
+<img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/b4e2a0d3-4d3a-4b0d-90b9-7a0a83f32b59"/>
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
-
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
-
-# Diagrams
-![Workflow](Add your workflow/architecture diagram here)
-*Add caption explaining your workflow*
-
-For Hardware:
-
-# Schematic & Circuit
-![Circuit](Add your circuit diagram here)
-*Add caption explaining connections*
-
-![Schematic](Add your schematic diagram here)
-*Add caption explaining the schematic*
-
-# Build Photos
-![Components](Add photo of your components here)
-*List out all components shown*
-
-![Build](Add photos of build process here)
-*Explain the build steps*
-
-![Final](Add photo of final product here)
-*Explain the final build*
 
 ### Project Demo
 # Video
-[Add your demo video link here]
+https://github.com/user-attachments/assets/7b1cf52d-fb00-43d5-9a44-97b4d365cc33
 *Explain what the video demonstrates*
 
 # Additional Demos
