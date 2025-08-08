@@ -1,208 +1,236 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'paragraphs.dart';
 
 class GameScreen extends StatefulWidget {
-  final int shuffleInterval; // in seconds, 0 means no shuffle
-  GameScreen({required this.shuffleInterval});
+  final String paragraph;
+  final int shuffleInterval; // seconds
+
+  GameScreen({required this.paragraph, required this.shuffleInterval});
 
   @override
-  State<GameScreen> createState() => _GameScreenState();
+  _GameScreenState createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  late String targetText;
+  List<String> keysRow1 = [];
+  List<String> keysRow2 = [];
+  List<String> keysRow3 = [];
+
   String typedText = "";
-  int timeLeft = 30;
-  Timer? gameTimer;
-  List<String> keys = [];
+
+  Timer? _shuffleTimer;
+  Timer? _countdownTimer;
+  int _timeLeft = 30; // countdown start
+
   bool gameOver = false;
-
-  // For background color cycling
-  final List<Color> backgroundColors = [
-    Colors.blue.shade100,
-    Colors.green.shade100,
-    Colors.pink.shade100,
-    Colors.orange.shade100,
-    Colors.purple.shade100,
-    Colors.teal.shade100,
-    Colors.yellow.shade100,
-    Colors.red.shade100,
-    Colors.cyan.shade100,
-    Colors.lime.shade100,
-    Colors.indigo.shade100,
-    Colors.amber.shade100,
-    Colors.deepOrange.shade100,
-    Colors.deepPurple.shade100,
-    Colors.lightGreen.shade100,
-    Colors.brown.shade100,
-    Colors.grey.shade300,
-    Colors.blueGrey.shade100,
-  ];
-  Color currentBackground = Colors.blue.shade100;
-
-  // For paragraph cycling
-  final List<String> _paragraphHistory = [];
-  final int _historyLimit = 15;
-  final Random _random = Random();
 
   @override
   void initState() {
     super.initState();
-    _startNewGame();
+    _generateKeyboard();
+    _startCountdown();
+
+    if (widget.shuffleInterval > 0) {
+      _shuffleTimer = Timer.periodic(
+        Duration(seconds: widget.shuffleInterval),
+        (_) => _shuffleKeyboard(),
+      );
+    }
   }
 
-  void _startNewGame() {
-    setState(() {
-      // Pick a new background color (not the same as last)
-      Color newColor;
-      do {
-        newColor = backgroundColors[_random.nextInt(backgroundColors.length)];
-      } while (newColor == currentBackground);
-      currentBackground = newColor;
+  void _generateKeyboard() {
+    // Row 1
+    List<String> letters1 = ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
+    // Row 2
+    List<String> letters2 = ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'];
+    // Row 3 with punctuation fixed at ends
+    List<String> letters3 = ['Z', 'X', 'C', 'V', 'B', 'N', 'M'];
 
-      // Pick a new paragraph not in recent history
-      String newParagraph;
-      List<String> available = funnyParagraphs
-          .where((p) => !_paragraphHistory.contains(p))
-          .toList();
-      if (available.isEmpty) {
-        _paragraphHistory.clear();
-        available = List.from(funnyParagraphs);
-      }
-      newParagraph = (available..shuffle(_random)).first;
-      targetText = newParagraph;
-      _paragraphHistory.add(newParagraph);
-      if (_paragraphHistory.length > _historyLimit) {
-        _paragraphHistory.removeAt(0);
-      }
+    String period = '.';
+    String comma = ',';
+    String apostrophe = "'";
+    String question = '?';
 
-      // Reset game state
-      typedText = "";
-      timeLeft = 30;
-      gameOver = false;
-      keys = _generateKeys();
-    });
+    letters1.shuffle(Random());
+    letters2.shuffle(Random());
+    letters3.shuffle(Random());
 
-    // Cancel any previous timer
-    gameTimer?.cancel();
-    _startGame();
+    keysRow1 = List.from(letters1);
+    keysRow2 = List.from(letters2);
+    keysRow3 = [comma, ...letters3, period, apostrophe, question];
   }
 
-  List<String> _generateKeys() {
-    return [
-      ...List.generate(26, (i) => String.fromCharCode(97 + i)),
-      ' ', '.', ',', '?'
-    ];
-  }
-
-  void _startGame() {
-    gameTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+  void _shuffleKeyboard() {
+    if (!gameOver) {
       setState(() {
-        timeLeft--;
-        if (widget.shuffleInterval > 0 && timeLeft % widget.shuffleInterval == 0) {
-          keys.shuffle(_random);
-        }
-        if (timeLeft <= 0) {
-          _endGame();
+        _generateKeyboard();
+      });
+    }
+  }
+
+  void _startCountdown() {
+    _countdownTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (!gameOver) {
+        setState(() {
+          if (_timeLeft > 0) {
+            _timeLeft--;
+            if (typedText == widget.paragraph) {
+              // Finished typing early
+              _showCongratsDialog();
+            }
+          } else {
+            timer.cancel();
+            _shuffleTimer?.cancel();
+            _showGameOverDialog();
+          }
+        });
+      }
+    });
+  }
+
+  void _onKeyTap(String key) {
+    if (!gameOver) {
+      setState(() {
+        typedText += key;
+        if (typedText == widget.paragraph) {
+          _showCongratsDialog();
         }
       });
-    });
-  }
-
-  void _endGame() {
-    gameTimer?.cancel();
-    setState(() => gameOver = true);
-
-    // Restart the game after a short delay
-    Future.delayed(Duration(seconds: 2), () {
-      _startNewGame();
-    });
-  }
-
-  double _accuracy() {
-    int correct = 0;
-    for (int i = 0; i < typedText.length && i < targetText.length; i++) {
-      if (typedText[i] == targetText[i]) correct++;
     }
-    return (correct / targetText.length) * 100;
   }
 
-  Widget _buildKeyboard() {
-    List<List<String>> rows = [
-      keys.sublist(0, 10),
-      keys.sublist(10, 19),
-      keys.sublist(19),
-    ];
+  void _showGameOverDialog() {
+    gameOver = true;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("⏳ Time's Up!"),
+        content: Text("You typed: \n$typedText"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Back to home
+            },
+            child: Text("OK"),
+          )
+        ],
+      ),
+    );
+  }
 
-    return Column(
-      children: rows.map((row) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: row.map((key) {
-            return Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(minimumSize: Size(40, 50)),
-                onPressed: gameOver ? null : () {
-                  setState(() {
-                    typedText += key;
-                    // If finished typing, end game early
-                    if (typedText.length >= targetText.length) {
-                      _endGame();
-                    }
-                  });
-                },
-                child: Text(key.toUpperCase(), style: TextStyle(fontSize: 18)),
-              ),
-            );
-          }).toList(),
-        );
-      }).toList(),
+  void _showCongratsDialog() {
+    gameOver = true;
+    _countdownTimer?.cancel();
+    _shuffleTimer?.cancel();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: Text("🎉 Congratulations!"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("You have successfully wasted your time."),
+            SizedBox(height: 6),
+            Text(
+              "(even though you have good reaction time)",
+              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Back to home
+            },
+            child: Text("OK"),
+          )
+        ],
+      ),
     );
   }
 
   @override
   void dispose() {
-    gameTimer?.cancel();
+    _shuffleTimer?.cancel();
+    _countdownTimer?.cancel();
     super.dispose();
+  }
+
+  Widget _buildKey(String label) {
+    return InkWell(
+      onTap: () => _onKeyTap(label),
+      child: Container(
+        margin: EdgeInsets.all(2),
+        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildKeyboardRow(List<String> row) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: row.map((k) => _buildKey(k)).toList(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Typing Challenge")),
-      body: AnimatedContainer(
-        duration: Duration(milliseconds: 600),
-        color: currentBackground,
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Text("Type this:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            Text(targetText, style: TextStyle(color: Colors.grey[700])),
-            SizedBox(height: 10),
-            Text("Time Left: $timeLeft s", style: TextStyle(fontSize: 20, color: Colors.red)),
-            Container(
-              margin: EdgeInsets.symmetric(vertical: 10),
-              padding: EdgeInsets.all(8),
-              color: Colors.grey[200],
-              width: double.infinity,
-              child: Text(typedText, style: TextStyle(fontSize: 18)),
+      appBar: AppBar(
+        title: Text("Typing Game"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Center(
+              child: Text(
+                "$_timeLeft s",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
             ),
-            Expanded(child: Align(
-              alignment: Alignment.bottomCenter,
-              child: _buildKeyboard(),
-            )),
-            if (gameOver) ...[
-              SizedBox(height: 10),
-              Text("Game Over!", style: TextStyle(fontSize: 22, color: Colors.red)),
-              Text("Accuracy: ${_accuracy().toStringAsFixed(2)}%"),
-              Text("Characters Typed: ${typedText.length}"),
-              Text("Restarting...", style: TextStyle(fontSize: 16, color: Colors.grey)),
-            ]
-          ],
-        ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Text(widget.paragraph,
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+          ),
+          Divider(),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              typedText,
+              style: TextStyle(
+                  fontSize: 18,
+                  color: typedText ==
+                          widget.paragraph.substring(0, typedText.length)
+                      ? Colors.black
+                      : Colors.red),
+            ),
+          ),
+          Spacer(),
+          _buildKeyboardRow(keysRow1),
+          SizedBox(height: 8),
+          _buildKeyboardRow(keysRow2),
+          SizedBox(height: 8),
+          _buildKeyboardRow(keysRow3),
+          SizedBox(height: 20),
+        ],
       ),
     );
   }
