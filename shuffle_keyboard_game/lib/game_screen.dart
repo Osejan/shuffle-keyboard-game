@@ -19,11 +19,74 @@ class _GameScreenState extends State<GameScreen> {
   List<String> keys = [];
   bool gameOver = false;
 
+  // For background color cycling
+  final List<Color> backgroundColors = [
+    Colors.blue.shade100,
+    Colors.green.shade100,
+    Colors.pink.shade100,
+    Colors.orange.shade100,
+    Colors.purple.shade100,
+    Colors.teal.shade100,
+    Colors.yellow.shade100,
+    Colors.red.shade100,
+    Colors.cyan.shade100,
+    Colors.lime.shade100,
+    Colors.indigo.shade100,
+    Colors.amber.shade100,
+    Colors.deepOrange.shade100,
+    Colors.deepPurple.shade100,
+    Colors.lightGreen.shade100,
+    Colors.brown.shade100,
+    Colors.grey.shade300,
+    Colors.blueGrey.shade100,
+  ];
+  Color currentBackground = Colors.blue.shade100;
+
+  // For paragraph cycling
+  final List<String> _paragraphHistory = [];
+  final int _historyLimit = 15;
+  final Random _random = Random();
+
   @override
   void initState() {
     super.initState();
-    targetText = (funnyParagraphs..shuffle()).first;
-    keys = _generateKeys();
+    _startNewGame();
+  }
+
+  void _startNewGame() {
+    setState(() {
+      // Pick a new background color (not the same as last)
+      Color newColor;
+      do {
+        newColor = backgroundColors[_random.nextInt(backgroundColors.length)];
+      } while (newColor == currentBackground);
+      currentBackground = newColor;
+
+      // Pick a new paragraph not in recent history
+      String newParagraph;
+      List<String> available = funnyParagraphs
+          .where((p) => !_paragraphHistory.contains(p))
+          .toList();
+      if (available.isEmpty) {
+        _paragraphHistory.clear();
+        available = List.from(funnyParagraphs);
+      }
+      newParagraph = (available..shuffle(_random)).first;
+      targetText = newParagraph;
+      _paragraphHistory.add(newParagraph);
+      if (_paragraphHistory.length > _historyLimit) {
+        _paragraphHistory.removeAt(0);
+      }
+
+      // Reset game state
+      typedText = "";
+      timeLeft = 30;
+      gameOver = false;
+      keys = _generateKeys();
+    });
+
+    // Cancel any previous timer
+    gameTimer?.cancel();
     _startGame();
   }
 
@@ -39,9 +102,11 @@ class _GameScreenState extends State<GameScreen> {
       setState(() {
         timeLeft--;
         if (widget.shuffleInterval > 0 && timeLeft % widget.shuffleInterval == 0) {
-          keys.shuffle(Random());
+          keys.shuffle(_random);
         }
-        if (timeLeft <= 0) _endGame();
+        if (timeLeft <= 0) {
+          _endGame();
+        }
       });
     });
   }
@@ -49,6 +114,11 @@ class _GameScreenState extends State<GameScreen> {
   void _endGame() {
     gameTimer?.cancel();
     setState(() => gameOver = true);
+
+    // Restart the game after a short delay
+    Future.delayed(Duration(seconds: 2), () {
+      _startNewGame();
+    });
   }
 
   double _accuracy() {
@@ -78,6 +148,10 @@ class _GameScreenState extends State<GameScreen> {
                 onPressed: gameOver ? null : () {
                   setState(() {
                     typedText += key;
+                    // If finished typing, end game early
+                    if (typedText.length >= targetText.length) {
+                      _endGame();
+                    }
                   });
                 },
                 child: Text(key.toUpperCase(), style: TextStyle(fontSize: 18)),
@@ -90,10 +164,18 @@ class _GameScreenState extends State<GameScreen> {
   }
 
   @override
+  void dispose() {
+    gameTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Typing Challenge")),
-      body: Padding(
+      body: AnimatedContainer(
+        duration: Duration(milliseconds: 600),
+        color: currentBackground,
         padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
@@ -117,6 +199,7 @@ class _GameScreenState extends State<GameScreen> {
               Text("Game Over!", style: TextStyle(fontSize: 22, color: Colors.red)),
               Text("Accuracy: ${_accuracy().toStringAsFixed(2)}%"),
               Text("Characters Typed: ${typedText.length}"),
+              Text("Restarting...", style: TextStyle(fontSize: 16, color: Colors.grey)),
             ]
           ],
         ),
