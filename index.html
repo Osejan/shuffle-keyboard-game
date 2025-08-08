@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Ant Detection</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0; overflow: hidden; background: #111;
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+      color: white;
+      font-family: Arial, sans-serif;
+      flex-direction: column;
+    }
+    #videoElement {
+      transform: scaleX(-1); /* Mirror video */
+      max-width: 90vw;
+      max-height: 70vh;
+      border-radius: 12px;
+    }
+    #canvas {
+      position: absolute;
+      top: 0; left: 0;
+      pointer-events: none;
+    }
+    #container {
+      position: relative;
+      width: 90vw;
+      max-width: 640px;
+      max-height: 480px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Ant Detection</h1>
+  <div id="container">
+    <video id="videoElement" autoplay muted playsinline></video>
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/inferencejs"></script>
+  <script src="main.js"></script>
+</body>
+</html>
