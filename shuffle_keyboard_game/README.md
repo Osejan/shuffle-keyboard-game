@@ -1,10 +1,9 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# SHUFFLE
+# KEYBOARD SHUFFLE
 
-## KEYBOARD  GAME :
-### Team Name: GALWAY
+## Team Name: GALWAY
 
 
 ### Team Members
@@ -57,14 +56,11 @@ For Software:
 ### Project Demo
 # Video
 https://github.com/user-attachments/assets/7b1cf52d-fb00-43d5-9a44-97b4d365cc33
-*Explain what the video demonstrates*
 
-# Additional Demos
-[Add any extra demo materials/links]
 
 ## Team Contributions
-- Anjose Benoy: [Specific contributions]
-- [Name 2]: [Specific contributions]
+- ANJOSE BENOY : APP DEVELOPMENT AND SOFTWARE PART
+- GAZWAN SARITH SLIM: LAYOUT DESIGN AND IMPLEMENTATION
 - [Name 3]: [Specific contributions]
 
 ---
