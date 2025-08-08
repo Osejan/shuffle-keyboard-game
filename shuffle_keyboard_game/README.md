@@ -51,7 +51,7 @@ For Software:
 # Screenshots (Add at least 3)
 <img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/b4e2a0d3-4d3a-4b0d-90b9-7a0a83f32b59"/>
 <img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/a8f24fdd-30aa-475c-96fe-3b992e4b2a9e"/>
-<img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/b4e2a0d3-4d3a-4b0d-90b9-7a0a83f32b59"/>
+<img width="200" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/d54f82a2-5947-4c0e-a957-ce9930d44e96"/>
 
 
 ### Project Demo
@@ -63,7 +63,7 @@ https://github.com/user-attachments/assets/7b1cf52d-fb00-43d5-9a44-97b4d365cc33
 [Add any extra demo materials/links]
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
+- Anjose Benoy: [Specific contributions]
 - [Name 2]: [Specific contributions]
 - [Name 3]: [Specific contributions]
 
